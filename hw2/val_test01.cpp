@@ -85,7 +85,9 @@ void f ( int n )
     cout << "  " << i << "  " << x[i] << "\n";
   }
 
-  delete [] x;
+// this should be a free(x) instead of delete []
+  // delete [] x;
+  free(x);
 
   return;
 }
