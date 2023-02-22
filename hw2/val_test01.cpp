@@ -77,7 +77,9 @@ void f ( int n )
   x[1] = 1;
   cout << "  " << 1 << "  " << x[1] << "\n";
 
-  for ( i = 2; i <= n; i++ )
+// allocated space for 10 ints, x[0..9], however the for loop goes to x[10], which hasn't been allocated
+// swith to i < n
+  for ( i = 2; i < n; i++ )
   {
     x[i] = x[i-1] + x[i-2];
     cout << "  " << i << "  " << x[i] << "\n";
