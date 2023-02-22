@@ -86,6 +86,7 @@ void f ( int n )
   }
 
 // this should be a free(x) instead of delete []
+// free is for malloc-ed memory, delete is for new objects
   // delete [] x;
   free(x);
 
