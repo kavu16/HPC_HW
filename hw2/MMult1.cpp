@@ -50,7 +50,7 @@ void MMult1(long m, long n, long k, double *a, double *b, double *c) {
         
         for (long ai = 0; ai < BLOCK_SIZE; ai++) {
           for (long aj = 0; aj < BLOCK_SIZE; aj++) {
-            acc[ai + aj*BLOCK_SIZE] += b[i+(j+aj)*k] * a[(p+ai)+i*m];
+            acc[ai + aj*BLOCK_SIZE] += b[p+(j+aj)*k] * a[(i+ai)+p*m];
           }
         }
 
