@@ -80,7 +80,6 @@ void sin4_intrin(double* sinx, const double* x) {
     _mm_store_pd(sinx+i, s);
   }
 #else
-  std::cout << "Intel Intrinsics not supported" << std::endl;
   sin4_reference(sinx, x);
 #endif
 }
