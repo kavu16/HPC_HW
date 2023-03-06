@@ -41,7 +41,7 @@ void MMult1(long m, long n, long k, double *a, double *b, double *c) {
 
 int main(int argc, char** argv) {
   const long PFIRST = BLOCK_SIZE;
-  const long PLAST = 1000;
+  const long PLAST = 2000;
   const long PINC = std::max(50/BLOCK_SIZE,1) * BLOCK_SIZE; // multiple of BLOCK_SIZE
 
   printf(" Dimension       Time    Gflop/s       GB/s        Error\n");
