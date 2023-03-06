@@ -26,9 +26,9 @@ void MMult0(long m, long n, long k, double *a, double *b, double *c) {
 
 void MMult1(long m, long n, long k, double *a, double *b, double *c) {
   // TODO: See instructions below
-  for (long i = 0; i < m; i++) {
+  for (long p = 0; p < k; p++) {
     for (long j = 0; j < n; j++) {
-      for (long p = 0; p < k; p++) {
+      for (long i = 0; i < m; i++) {
         double A_ip = a[i+p*m];
         double B_pj = b[p+j*k];
         double C_ij = c[i+j*m];
