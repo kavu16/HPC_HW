@@ -2,10 +2,10 @@
 
 #include <stdio.h>
 #include <math.h>
-// #include <omp.h> 
+#include <omp.h> 
 #include "utils.h"
 
-#define BLOCK_SIZE 8
+#define BLOCK_SIZE 32
 
 // Note: matrices are stored in column major order; i.e. the array elements in
 // the (m x n) matrix C are stored in the sequence: {C_00, C_10, ..., C_m0,
@@ -38,28 +38,33 @@ void MMult1(long m, long n, long k, double *a, double *b, double *c) {
   //   }
   // }
   double* acc = (double*) aligned_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
-  for (long p = 0; p < k; p += BLOCK_SIZE) {
-    for (long j = 0; j < n; j += BLOCK_SIZE) {
-      for (long a = 0; a < BLOCK_SIZE * BLOCK_SIZE; a++) {
-        acc[a] = 0;
-      }
-      for (long i = 0; i < m; i++) {
-        // double A_ip = a[i+p*m];
-        // double B_pj = b[p+j*k];
-        // double C_ij = c[i+j*m];
-        
-        for (long ai = 0; ai < BLOCK_SIZE; ai++) {
-          for (long aj = 0; aj < BLOCK_SIZE; aj++) {
-            acc[ai + aj*BLOCK_SIZE] += b[i+(j+aj)*k] * a[(p+ai)+i*m];
-          }
-        }
+  for (long block = 0; block < n; block+=BLOCK_SIZE) {
+    for (long p = 0; p < k; p++) {
 
-        // C_ij = C_ij + A_ip * B_pj;
-        // c[i+j*m] = C_ij;
-      }
-      for (long ci = 0; ci < BLOCK_SIZE; ci++) {
-        for (long cj = 0; cj < BLOCK_SIZE; cj++) {
-          c[(p+ci) + (j+cj)*m] += acc[ci + cj*BLOCK_SIZE];
+      for (long j = 0; j < (block + BLOCK_SIZE); j++) {
+    
+        for (long a = 0; a < BLOCK_SIZE * BLOCK_SIZE; a++) {
+          acc[a] = 0;
+        }
+    
+        for (long i = 0; i < m; i++) {
+          // double A_ip = a[i+p*m];
+          // double B_pj = b[p+j*k];
+          // double C_ij = c[i+j*m];
+          
+          for (long ai = 0; ai < BLOCK_SIZE; ai++) {
+            for (long aj = 0; aj < BLOCK_SIZE; aj++) {
+              acc[ai + aj*BLOCK_SIZE] += b[i+(j+aj)*k] * a[(p+ai)+i*m];
+            }
+          }
+
+          // C_ij = C_ij + A_ip * B_pj;
+          // c[i+j*m] = C_ij;
+        }
+        for (long ci = 0; ci < BLOCK_SIZE; ci++) {
+          for (long cj = 0; cj < BLOCK_SIZE; cj++) {
+            c[(p+ci) + (j+cj)*m] += acc[ci + cj*BLOCK_SIZE];
+          }
         }
       }
     }
