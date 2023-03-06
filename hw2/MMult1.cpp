@@ -63,7 +63,7 @@ void MMult1(long m, long n, long k, double *a, double *b, double *c) {
         // c[i+j*m] = C_ij;
     //   }
     // }
-  }
+  // }
   // aligned_free(acc);
 }
 
