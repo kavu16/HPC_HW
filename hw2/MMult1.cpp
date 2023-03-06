@@ -27,8 +27,8 @@ void MMult0(long m, long n, long k, double *a, double *b, double *c) {
 void MMult1(long m, long n, long k, double *a, double *b, double *c) {
   // TODO: See instructions below
   for (long j = 0; j < n; j++) {
-    for (long i = 0; i < m; i++) {
-      for (long p = 0; p < k; p++) {
+    for (long p = 0; p < k; p++) {
+      for (long i = 0; i < m; i++) {
         double A_ip = a[i+p*m];
         double B_pj = b[p+j*k];
         double C_ij = c[i+j*m];
@@ -41,7 +41,7 @@ void MMult1(long m, long n, long k, double *a, double *b, double *c) {
 
 int main(int argc, char** argv) {
   const long PFIRST = BLOCK_SIZE;
-  const long PLAST = 2000;
+  const long PLAST = 1000;
   const long PINC = std::max(50/BLOCK_SIZE,1) * BLOCK_SIZE; // multiple of BLOCK_SIZE
 
   printf(" Dimension       Time    Gflop/s       GB/s        Error\n");
