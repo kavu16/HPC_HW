@@ -64,6 +64,7 @@ void MMult1(long m, long n, long k, double *a, double *b, double *c) {
       }
     }
   }
+  aligned_free(acc);
 }
 
 int main(int argc, char** argv) {
