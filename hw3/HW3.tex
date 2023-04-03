@@ -1,0 +1,355 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[legalpaper]{geometry}
+\usepackage{physics}
+
+\title{HPC, Homework 3}
+\author{Brady Edwards - bse4289}
+\date{April 2, 2023}
+
+\begin{document}
+
+\maketitle
+All reports from the Apple M1 chip
+\begin{enumerate}
+    \item 
+    \begin{enumerate}
+        \item In general, each $\mathrm{for}$ loop would take about $O(n^2)$ time to 
+execute.  With multiple threads, this time will be divided amongst $t$ threads, so we 
+have $n^2/t$.  However the second $\mathrm{for}$ loop has to wait for the first one to 
+finish, and so we have $2*n^2/t$ for the total time where about half of that time will 
+be waiting.
+
+        \item The static modifier splits the for loop into chunks of the specified size 
+and then those are assigned in order to different threads.  This should result in about 
+the same theoretical execution time since you still have the same number of threads 
+running in parallel.
+
+        \item The dynamic modifier works by assigning iteration chunks to any free 
+thread.  The way these are assigned is non-deterministic, however you can see some 
+speed up, e.g., if a thread gets assigned long chunks, many short chunks could be 
+assigned to other threads while it is executing.
+
+        \item Yes, the $\mathrm{nowait}$ clause allows us to continue execution without 
+waiting for the previous threads to resolve.  This would cut our exectution in half 
+because half the time spent above was in waiting.
+    \end{enumerate}
+
+    \item In parallelizing my omp-scan code, I got some strange results where I would 
+get large errors even though my final sum was the same.  I think my code should be 
+correct, where i parallelize, put the offsets into a shared vector, then update in 
+parallel based on where we are in the iteration.  Perhaps the collapse clause isn't 
+quite right, but the errors looked like datatype errors rather than arithmetic errors 
+to me, so the final sum matching convinced me that in theory everything was right, just 
+maybe missing something in the C++ code.  I also think there might be cache things 
+going on where the sequential gets faster.  The following are timings for 1, 2, 3, and 
+4 threads respectively, on my M1 chip with 4 available cores.
+
+    \begin{verbatim}
+export OMP_NUM_THREADS=1
+
+./omp-scan
+Final sum = 64818392
+sequential-scan = 0.234070s
+Final sum = 64818392
+parallel-scan   = 0.373391s
+error = 0
+
+export OMP_NUM_THREADS=2
+
+./omp-scan
+Final sum = 64818392
+sequential-scan = 0.267011s
+Final sum = 64818392
+parallel-scan   = 0.349630s
+error = 53688865021493248
+
+export OMP_NUM_THREADS=3
+
+./omp-scan
+Final sum = 64818392
+sequential-scan = 0.223141s
+Final sum = 1121116657
+parallel-scan   = 0.342506s
+error = 71587972667550439
+
+export OMP_NUM_THREADS=4
+
+./omp-scan
+Final sum = 64818392
+sequential-scan = 0.233759s
+Final sum = 64818392
+parallel-scan   = 0.289121s
+error = 80536748538462208
+    \end{verbatim}
+
+    \item The results looked like they were going to converge, though I'm not sure why 
+they seem to get stuck in convergence for small numbers, perhaps this is just the 
+slowness of these methods.  My Gauss-Seidel implentations did a little more poorly, I 
+think the issue was in red-black ordering when trying to collapse the for loops in the 
+#pragma. I tried to start the iterator based off of the other iterator, but i don't 
+think openmp liked that, so i had to just collapse the outer loop.  Here are the 
+timings for the M1 chip with 4 processors, 5000 iterations, and N=10, 100, 1000.  
+
+    Jacobi:
+    \begin{verbatim}
+export OMP_NUM_THREADS=1
+
+./jacobi2D-omp
+h = 0.090909
+Initial res = 10.000000
+Residual = 9.552487
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+jacobi timing, 5000 iterations, 10 points  = 0.005982s
+h = 0.009901
+Initial res = 100.000000
+Residual = 99.561539
+Residual = 83.125823
+Residual = 76.403021
+Residual = 71.612993
+Residual = 68.003294
+Residual = 65.244623
+Residual = 63.124044
+Residual = 61.488029
+Residual = 60.222275
+Residual = 59.240622
+jacobi timing, 5000 iterations, 100 points  = 0.142640s
+h = 0.000999
+Initial res = 1000.000000
+Residual = 999.562404
+Residual = 982.675701
+Residual = 975.339450
+Residual = 969.720009
+Residual = 964.990191
+Residual = 960.829207
+Residual = 957.072441
+Residual = 953.622068
+Residual = 950.414335
+Residual = 947.404948
+jacobi timing, 5000 iterations, 1000 points  = 14.796754s
+
+export OMP_NUM_THREADS=2
+
+./jacobi2D-omp
+h = 0.090909
+Initial res = 10.000000
+Residual = 9.552487
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+jacobi timing, 5000 iterations, 10 points  = 0.083807s
+h = 0.009901
+Initial res = 100.000000
+Residual = 99.561539
+Residual = 83.125823
+Residual = 76.403021
+Residual = 71.612993
+Residual = 68.003294
+Residual = 65.244623
+Residual = 63.124044
+Residual = 61.488029
+Residual = 60.222275
+Residual = 59.240622
+jacobi timing, 5000 iterations, 100 points  = 0.184689s
+h = 0.000999
+Initial res = 1000.000000
+Residual = 999.562404
+Residual = 982.675701
+Residual = 975.339450
+Residual = 969.720009
+Residual = 964.990191
+Residual = 960.829207
+Residual = 957.072441
+Residual = 953.622068
+Residual = 950.414335
+Residual = 947.404948
+jacobi timing, 5000 iterations, 1000 points  = 9.336672s
+
+export OMP_NUM_THREADS=4
+
+./jacobi2D-omp
+h = 0.090909
+Initial res = 10.000000
+Residual = 9.552487
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+jacobi timing, 5000 iterations, 10 points  = 0.143883s
+h = 0.009901
+Initial res = 100.000000
+Residual = 99.561539
+Residual = 83.125823
+Residual = 76.403021
+Residual = 71.612993
+Residual = 68.003294
+Residual = 65.244623
+Residual = 63.124044
+Residual = 61.488029
+Residual = 60.222275
+Residual = 59.240622
+jacobi timing, 5000 iterations, 100 points  = 0.227132s
+h = 0.000999
+Initial res = 1000.000000
+Residual = 999.562404
+Residual = 982.675701
+Residual = 975.339450
+Residual = 969.720009
+Residual = 964.990191
+Residual = 960.829207
+Residual = 957.072441
+Residual = 953.622068
+Residual = 950.414335
+Residual = 947.404948
+jacobi timing, 5000 iterations, 1000 points  = 7.119380s
+    \end{verbatim}
+
+    Gauss-Seidel:
+    \begin{verbatim}
+export OMP_NUM_THREADS=1
+
+./gs2D-omp
+Initial res = 10.000000
+Residual = 10.384032
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+GS timing, 5000 iterations, 10 points  = 0.007290s
+Initial res = 100.000000
+Residual = 111.014744
+Residual = 80.467567
+Residual = 69.753326
+Residual = 63.844862
+Residual = 60.509939
+Residual = 58.590196
+Residual = 57.463932
+Residual = 56.792766
+Residual = 56.388157
+Residual = 56.142292
+GS timing, 5000 iterations, 100 points  = 0.147090s
+Initial res = 1000.000000
+Residual = 1117.246046
+Residual = 1084.957420
+Residual = 1071.091620
+Residual = 1060.487011
+Residual = 1051.572349
+Residual = 1043.738465
+Residual = 1036.672789
+Residual = 1030.189575
+Residual = 1024.167768
+Residual = 1018.523264
+GS timing, 5000 iterations, 1000 points  = 15.939869s
+    
+export OMP_NUM_THREADS=2
+
+./gs2D-omp
+Initial res = 10.000000
+Residual = 10.384032
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+GS timing, 5000 iterations, 10 points  = 0.134072s
+Initial res = 100.000000
+Residual = 111.014744
+Residual = 80.467567
+Residual = 69.753326
+Residual = 63.844862
+Residual = 60.509939
+Residual = 58.590196
+Residual = 57.463932
+Residual = 56.792766
+Residual = 56.388157
+Residual = 56.142292
+GS timing, 5000 iterations, 100 points  = 0.216914s
+Initial res = 1000.000000
+Residual = 1117.246046
+Residual = 1084.957420
+Residual = 1071.091620
+Residual = 1060.487011
+Residual = 1051.572349
+Residual = 1043.738465
+Residual = 1036.672789
+Residual = 1030.189575
+Residual = 1024.167768
+Residual = 1018.523264
+GS timing, 5000 iterations, 1000 points  = 10.165726s
+
+export OMP_NUM_THREADS=4
+
+./gs2D-omp
+Initial res = 10.000000
+Residual = 10.384032
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+Residual = 5.354119
+GS timing, 5000 iterations, 10 points  = 0.205932s
+Initial res = 100.000000
+Residual = 111.014744
+Residual = 80.467567
+Residual = 69.753326
+Residual = 63.844862
+Residual = 60.509939
+Residual = 58.590196
+Residual = 57.463932
+Residual = 56.792766
+Residual = 56.388157
+Residual = 56.142292
+GS timing, 5000 iterations, 100 points  = 0.299186s
+Initial res = 1000.000000
+Residual = 1117.246046
+Residual = 1084.957420
+Residual = 1071.091620
+Residual = 1060.487011
+Residual = 1051.572349
+Residual = 1043.738465
+Residual = 1036.672789
+Residual = 1030.189575
+Residual = 1024.167768
+Residual = 1018.523264
+GS timing, 5000 iterations, 1000 points  = 8.582118s
+    \end{verbatim}
+    
+    
+\end{enumerate}
+
+\end{document}

@@ -6,13 +6,15 @@
 #include <omp.h>
 #endif
 
-void jacobi_omp(std::vector<double>& u, const std::vector<double> f, const double n) {
+void jacobi_omp(std::vector<double>& u, const std::vector<double> f, int n) {
 
     // omp_set_num_threads(omp_get_max_threads());
-    double h = 1/(n+1);
+    
+    double h = 1/((double) (n+1));
+    printf("h = %f\n", h);
 
     double res = 0;
-    #pragma parallel for reduction(+:res) collapse(2)
+    #pragma omp parallel for reduction(+:res) collapse(2)
     for (int i = 1; i < n + 1; i++) {
         for (int j = 1; j < n + 1; j++) {
             int index = i*(n+1) + j + 1;
@@ -26,7 +28,7 @@ void jacobi_omp(std::vector<double>& u, const std::vector<double> f, const doubl
     int iter = 0;
     while(iter < 5000) {
         std::vector<double> unew (u);
-        #pragma parallel for collapse(2)
+        #pragma omp parallel for collapse(2)
         for (int i=1; i < n + 1; i++) {
             for (int j=1; j < n + 1; j++) {
                 int index = i*(n+1) + j + 1;
@@ -37,7 +39,7 @@ void jacobi_omp(std::vector<double>& u, const std::vector<double> f, const doubl
         u.swap(unew);
 
         res = 0;
-        #pragma parallel for reduction(+:res) collapse(2)
+        #pragma omp parallel for reduction(+:res) collapse(2)
         for (int i = 1; i < n + 1; i++) {
             for (int j = 1; j < n + 1; j++) {
                 int index = i*(n+1) + j + 1;
@@ -92,19 +94,27 @@ void jacobi(std::vector<double>& u, const std::vector<double> f, const double n)
 }
 
 int main() {
-    int N = 1000;
-
-    std::vector<double> u ((N+2)*(N+2));
-    std::vector<double> f ((N+2)*(N+2));
-    std::fill(u.begin(),u.end(),0);
-    std::fill(f.begin(),f.end(),1);
-
-    
     #if defined(_OPENMP)
-        jacobi_omp(u,f,N);
+        for (int N = 10; N <= 1000; N *= 10) {
+            std::vector<double> u ((N+2)*(N+2));
+            std::vector<double> f ((N+2)*(N+2));
+            std::fill(u.begin(),u.end(),0);
+            std::fill(f.begin(),f.end(),1);
+            
+            double tt = omp_get_wtime();
+            jacobi_omp(u,f,N);
+            printf("jacobi timing, 5000 iterations, %d points  = %fs\n", N, omp_get_wtime() - tt);
+        }
     #else 
-        jacobi(u, f, N);
+        for (int N = 10; N <= 1000; N*=10) {
+            std::vector<double> u ((N+2)*(N+2));
+            std::vector<double> f ((N+2)*(N+2));
+            std::fill(u.begin(),u.end(),0);
+            std::fill(f.begin(),f.end(),1);
+            jacobi(u, f, N);
+        }
     #endif
+    
 
     return 0;
 }

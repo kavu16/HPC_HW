@@ -28,7 +28,6 @@ void scan_omp(long* prefix_sum, const long* A, long n) {
   
   #pragma omp parallel 
   {
-  printf("Thread # %i started\n", omp_get_thread_num());
   int t = omp_get_thread_num();
   #pragma omp for schedule(monotonic: static, n/p)
   for (long i = 1; i < n; i++) {
