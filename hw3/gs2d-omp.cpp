@@ -28,9 +28,17 @@ void jacobi_omp(std::vector<double>& u, const std::vector<double> f, const doubl
         std::vector<double> unew (u);
         #pragma parallel for collapse(2)
         for (int i=1; i < n + 1; i++) {
-            for (int j=1; j < n + 1; j++) {
+            for (int j=((i+1)%2 + 1); j < n + 1; j+=2) {
                 int index = i*(n+1) + j + 1;
                 unew[index] = 0.25*(h*h*f[index] + u[index - 1] + u[index+1] + u[index - (n+1)] + u[index + (n+1)]);
+            }
+        }
+
+        #pragma parallel for collapse(2)
+        for (int i=1; i < n + 1; i++) {
+            for (int j=((i%2)+1); j < n + 1; j+=2) {
+                int index = i*(n+1) + j + 1;
+                unew[index] = 0.25*(h*h*f[index] + unew[index - 1] + unew[index+1] + unew[index - (n+1)] + unew[index + (n+1)]);
             }
         }
         
@@ -92,7 +100,7 @@ void jacobi(std::vector<double>& u, const std::vector<double> f, const double n)
 }
 
 int main() {
-    int N = 1000;
+    int N = 10;
 
     std::vector<double> u ((N+2)*(N+2));
     std::vector<double> f ((N+2)*(N+2));
