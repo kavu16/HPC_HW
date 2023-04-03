@@ -3,6 +3,7 @@
 #include <math.h>
 #include <omp.h>
 #include <climits>
+#include <vector>
 
 // Scan A array and write result into prefix_sum array;
 // use long data type to avoid overflow
@@ -17,22 +18,38 @@ void scan_seq(long* prefix_sum, const long* A, long n) {
 
 void scan_omp(long* prefix_sum, const long* A, long n) {
   int p = omp_get_max_threads();
-  int t = omp_get_thread_num();
   omp_set_num_threads(p);
   // Fill out parallel scan: One way to do this is array into p chunks
   // Do a scan in parallel on each chunk, then share/compute the offset
   // through a shared vector and update each chunk by adding the offset
   // in parallel
   if (n==0) return;
-  prefix_sum[0] = 0;
-  long x = 0;
-  #pragma omp parallel for simd reduction(inscan,+: x)
-  for (long i = 0; i < n; i++) {
-    // prefix_sum[i] = prefix_sum[i-1] + A[i-1];
-    x += A[i];
-    #pragma omp scan inclusive(x)
-    prefix_sum[i] = x;
+  prefix_sum[0] = A[0];
+  
+  #pragma omp parallel 
+  {
+  printf("Thread # %i started\n", omp_get_thread_num());
+  int t = omp_get_thread_num();
+  #pragma omp for schedule(monotonic: static, n/p)
+  for (long i = 1; i < n; i++) {
+    prefix_sum[i] = prefix_sum[i-1] + A[i];
   }
+  }
+
+  std::vector<int> offsets;
+  for (int i = 0; i < p; i++) {
+    offsets.push_back(prefix_sum[(i+1)*(n/p)]);
+  }
+
+  #pragma omp parallel for schedule(monotonic: static) collapse(2)
+  for (int i = 1; i < p; i++) {
+    for (int j = 0; j < (n/p); j++) {
+      for (int o = 0; o < i; o++) {
+        prefix_sum[i*(n/p) + j] += offsets[o];
+      }
+    }
+  }
+  
   printf("Final sum = %d\n", prefix_sum[n-1]);
 }
 
