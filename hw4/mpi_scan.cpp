@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
         double* scan_array = (double*) malloc(N * sizeof(double));
         for (long i = 0; i < N; ++i) scan_array[i] = rand()*2;
 
-        MPI_Scatter(scan_array, N, MPI_DOUBLE, local_scan, N/mpisize, MPI_DOUBLE, 0, comm);
+        MPI_Scatter(scan_array, N/mpisize, MPI_DOUBLE, local_scan, N/mpisize, MPI_DOUBLE, 0, comm);
         free(scan_array);
     }
 
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     MPI_Barrier(comm);
     double *final_array = (double*) malloc(N * sizeof(double));
     MPI_Gather(local_scan, N/mpisize, MPI_DOUBLE, 
-               final_array, N, MPI_DOUBLE, 0, comm);
+               final_array, N/mpisize, MPI_DOUBLE, 0, comm);
     if (mpirank == 0) {
         std::cout << "Final scan = " << final_array[N-1] << std::endl;
     }
