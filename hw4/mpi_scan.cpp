@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
     
     long N = atol(argv[1]);
 
-    int* local_scan = (double*) malloc(N/mpisize * sizeof(double));
+    double* local_scan = (double*) malloc(N/mpisize * sizeof(double));
     if (mpirank == 0) {
         double* scan_array = (double*) malloc(N * sizeof(double));
         for (long i = 0; i < N; ++i) scan_array[i] = rand()*2;
