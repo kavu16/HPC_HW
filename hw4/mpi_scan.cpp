@@ -18,8 +18,8 @@ int main(int argc, char** argv) {
 
     double* local_scan = (double*) malloc(N/mpisize * sizeof(double));
     double* scan_array = (double*) malloc(N * sizeof(double));
-    for (long i = 0; i < N; ++i) scan_array[i] = 1.0;
-    
+    for (long i = 0; i < N; ++i) scan_array[i] = (double) i;
+
     MPI_Scatter(scan_array, N/mpisize, MPI_DOUBLE, local_scan, N/mpisize, MPI_DOUBLE, 0, comm);
 
     MPI_Barrier(comm);
@@ -33,7 +33,6 @@ int main(int argc, char** argv) {
     double* all_offsets = (double*) malloc(mpisize*sizeof(double));
     MPI_Allgather(&offset, 1, MPI_DOUBLE, all_offsets, 1, MPI_DOUBLE, comm);
 
-    std::cout<< "offset for process " << mpirank << " is " << all_offsets[mpirank] << std::endl;
 
     if (mpirank != 0) {
         for (long i = 0; i < N/mpisize; ++i) {
@@ -44,12 +43,12 @@ int main(int argc, char** argv) {
     }
 
     MPI_Barrier(comm);
-    std::cout<< "Process " << mpirank << " final scan total = " << local_scan[N/mpisize - 1] << std::endl;
 
     double *final_array = (double*) malloc(N * sizeof(double));
     MPI_Gather(local_scan, N/mpisize, MPI_DOUBLE, 
                final_array, N/mpisize, MPI_DOUBLE, 0, comm);
     if (mpirank == 0) {
+
         std::cout << "Final scan = " << final_array[N-1] << std::endl;
     }
     free(final_array);
