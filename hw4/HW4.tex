@@ -1,0 +1,113 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[legalpaper]{geometry}
+\usepackage{physics}
+
+\title{HPC, Homework 4}
+\author{Brady Edwards - bse4289}
+\date{April 23, 2023}
+
+\begin{document}
+
+\maketitle
+All reporting from NYU Greene Clusters.  
+\begin{enumerate}
+    \item The pingpong example from Lecture 7 was used as is on the Greene cluster. 
+    \begin{verbatim}
+#!/bin/bash
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=1:00:00
+#SBATCH --mem=2GB
+#SBATCH --job-name=pingpong
+#SBATCH --output=pingpong.out
+
+mpirun ./pingpong 0 1
+
+pingpong latency: 8.573760e-04 ms
+pingpong bandwidth: 1.236839e+01 GB/s
+    \end{verbatim}
+
+    \item In this problem, we developed a program to pass around an integer in a ring, 
+adding the rank of the current process every time.  Message latency and bandwidth was 
+reported for different loop lengths and data sizes.
+
+    The first test sent only a single integer over the network.
+    \begin{verbatim}
+#!/bin/bash
+#SBATCH --nodes=5
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:05:00
+#SBATCH --mem=2GB
+#SBATCH --job-name=int_ring
+#SBATCH --output=int_ring.out
+
+mpirun ./int_ring 1000
+    
+Greene cluster id for process 0: cs443.hpc.nyu.edu
+Greene cluster id for process 4: cs447.hpc.nyu.edu
+Greene cluster id for process 3: cs446.hpc.nyu.edu
+Greene cluster id for process 2: cs445.hpc.nyu.edu
+Greene cluster id for process 1: cs444.hpc.nyu.edu
+The expected sum was: 10000
+The final sum was: 10000
+Message latency: 0.0796986 ms
+    \end{verbatim}
+
+    The program was then tested using a 2MB array of integers and bandwidth was tested.
+    \begin{verbatim}
+#!/bin/bash
+#SBATCH --nodes=5
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:05:00
+#SBATCH --mem=2GB
+#SBATCH --job-name=int_ring
+#SBATCH --output=int_ring.out
+
+mpirun ./int_ring 100000
+
+Greene cluster id for process 0: cs337.hpc.nyu.edu
+Greene cluster id for process 3: cs340.hpc.nyu.edu
+Greene cluster id for process 2: cs339.hpc.nyu.edu
+Greene cluster id for process 1: cs338.hpc.nyu.edu
+Greene cluster id for process 4: cs341.hpc.nyu.edu
+The expected sum was: 1000000
+The final sum was: 1000000
+Message latency: 0.403047 ms
+Message bandwidth: 5.20325 GB/s
+    \end{verbatim}
+
+    \item In this question we created a program for the scan function using MPI.  MPI 
+Scatter was used to send chunks of the array to each process, then each process did a 
+local scan, calculated the offset, broadcast that to an offset array, and then locally 
+added the offsets based on the current rank (only adding offsets from the lower ranks).  
+Then all of the local scans were gathered into a final array.  This was tested on 
+triangular numbers.
+
+    \begin{verbatim}
+#!/bin/bash
+#SBATCH --nodes=5
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=00:05:00
+#SBATCH --mem=2GB
+#SBATCH --job-name=mpi_scan
+#SBATCH --output=mpi_scan.out
+
+mpirun ./mpi_scan 10000
+    
+Final scan = 5.0005e+07
+    \end{verbatim}
+
+    \item I am doing my final project with Jack Gindi and we are working on an MPI 
+implementation of Simulated Annealing, with at least the travelling salesman problem 
+and potentially others.  
+\end{enumerate}
+
+\end{document}
