@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
         std::cout<<"The expected sum was: "<<expected<<std::endl;
         std::cout<<"The final sum was: "<<final_sum[0]<<std::endl;
         std::cout<<"Message latency: "<<tt/N*1000<<" ms"<<std::endl;
-        std::cout<<"Message bandwidth: "<< (524288*sizeof(int)*Nrepeat)/tt/1e9 <<" GB/s"<<std::endl;
+        std::cout<<"Message bandwidth: "<< (524288*sizeof(int)*N)/tt/1e9 <<" GB/s"<<std::endl;
     }
 
     MPI_Finalize();
