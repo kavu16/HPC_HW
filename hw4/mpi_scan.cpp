@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
         double* scan_array = (double*) malloc(N * sizeof(double));
         for (long i = 0; i < N; ++i) scan_array[i] = rand()*2;
 
-        MPI_Scatter(scan_array, N/mpisize, MPI_DOUBLE, &local_scan, N/mpisize, MPI_DOUBLE, 0, comm);
+        MPI_Scatter(scan_array, N/mpisize, MPI_DOUBLE, local_scan, N/mpisize, MPI_DOUBLE, 0, comm);
         free(scan_array);
     }
 
