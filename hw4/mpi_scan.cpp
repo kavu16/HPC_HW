@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
 
     double* local_scan = (double*) malloc(N/mpisize * sizeof(double));
     double* scan_array = (double*) malloc(N * sizeof(double));
-    for (long i = 0; i < N; ++i) scan_array[i] = (double) i;
+    for (long i = 0; i < N; ++i) scan_array[i] = (double) i + 1.0;
 
     MPI_Scatter(scan_array, N/mpisize, MPI_DOUBLE, local_scan, N/mpisize, MPI_DOUBLE, 0, comm);
 
