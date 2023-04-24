@@ -1,6 +1,9 @@
 // integer ring MPI program
 // HPC HW4 - Q2
 
+// Usage: ./<executable> -N
+// N = repetitions
+
 #include <mpi.h>
 #include <iostream>
 #include <stdlib.h>
@@ -26,8 +29,8 @@ int main(int argc, char** argv) {
         if (mpirank == 0 && i == 0) {
             // 2MB = 2 * 2^20 bytes = 2^2 bytes * 2^19 bytes = sizeof(int) * 524288
             int* init = (int*) malloc(524288 * sizeof(int));
-            for (long i = 0; i < 524288; ++i) init[i] = 0;
             // int init = 0;
+            for (long i = 0; i < 524288; ++i) init[i] = 0;
             // MPI_Send(&init, 1, MPI_INT, 1, 999, comm);
             MPI_Send(init, 1, MPI_INT, 1, 999, comm);
             free(init);
@@ -63,8 +66,9 @@ int main(int argc, char** argv) {
         std::cout<<"The expected sum was: "<<expected<<std::endl;
         std::cout<<"The final sum was: "<<final_sum[0]<<std::endl;
         std::cout<<"Message latency: "<<tt/N*1000<<" ms"<<std::endl;
+        std::cout<<"Message bandwidth: "<< (524288*sizeof(int)*Nrepeat)/tt/1e9 <<" GB/s"<<std::endl;
     }
 
     MPI_Finalize();
-
+    return 0;
 }

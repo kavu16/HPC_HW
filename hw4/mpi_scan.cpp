@@ -1,6 +1,9 @@
 // MPI scan function
 // HPC HW4 Q3
 
+// Usage: ./<executable> -N 
+// N = size of array
+
 #include <mpi.h>
 #include <iostream>
 #include <stdlib.h>
@@ -14,7 +17,6 @@ int main(int argc, char** argv) {
     MPI_Comm_size(comm, &mpisize);
     
     long N = atol(argv[1]);
-
 
     double* local_scan = (double*) malloc(N/mpisize * sizeof(double));
     double* scan_array = (double*) malloc(N * sizeof(double));
@@ -52,6 +54,7 @@ int main(int argc, char** argv) {
         std::cout << "Final scan = " << final_array[N-1] << std::endl;
     }
     free(final_array);
+    free(scan_array);
     free(local_scan);
     free(all_offsets);
     return 0;
