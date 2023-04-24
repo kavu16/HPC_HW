@@ -15,12 +15,11 @@ int main(int argc, char** argv) {
     
     long N = atol(argv[1]);
 
-    double* scan_array;
+
     double* local_scan = (double*) malloc(N/mpisize * sizeof(double));
-    if (mpirank == 0) {
-        double* scan_array = (double*) malloc(N * sizeof(double));
-        for (long i = 0; i < N; ++i) scan_array[i] = 1.0;
-    }
+    double* scan_array = (double*) malloc(N * sizeof(double));
+    for (long i = 0; i < N; ++i) scan_array[i] = 1.0;
+    
     MPI_Scatter(scan_array, N/mpisize, MPI_DOUBLE, local_scan, N/mpisize, MPI_DOUBLE, 0, comm);
 
     MPI_Barrier(comm);
