@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    if (rank == 0) {
+    if (mpirank == 0) {
         int final_sum;
         MPI_Recv(&final_sum, 1, MPI_INT, mpisize-1, 999, comm, &status);
 
