@@ -13,17 +13,20 @@ int main(int argc, char** argv) {
     MPI_Comm_rank(comm, &mpirank);
     MPI_Comm_size(comm, &mpisize);
 
+    int namelen;
+    char processor_name[MPI_MAX_PROCESSOR_NAME];
+    MPI_Get_processor_name(processor_name, &namelen);
+    std::cout << "Greene cluster id for process " << mpirank << ": " << processor_name << std::endl;
+
     long N = atol(argv[1]);
 
     MPI_Status status;
     for (long i = 0; i < N; ++i) {
         if (mpirank == 0 && i == 0) {
-            std::cout << "Greene cluster id for process " << mpirank << ": " << os.uname() << std::endl;
             int init = 0;
             MPI_Send(&init, 1, MPI_INT, 1, 999, comm);
         }
         else {
-            if (i == 0) std::cout << "Greene cluster id for process " << mpirank << ": " << os.uname() << std::endl;
             int curr;
             MPI_Recv(&curr, 1, MPI_INT, (mpirank - 1 + mpisize)%mpisize, 999, comm, &status);
 
