@@ -2,7 +2,6 @@
 // HPC HW4 - Q2
 
 #include <mpi.h>
-#include <vector>
 #include <iostream>
 
 int main(int argc, char** argv) {
@@ -21,6 +20,7 @@ int main(int argc, char** argv) {
     long N = atol(argv[1]);
 
     MPI_Status status;
+    double tt = MPI_Wtime();
     for (long i = 0; i < N; ++i) {
         if (mpirank == 0 && i == 0) {
             int init = 0;
@@ -35,6 +35,7 @@ int main(int argc, char** argv) {
             MPI_Send(&curr, 1, MPI_INT, (mpirank + 1)%mpisize, 999, comm);
         }
     }
+    tt = MPI_Wtime() - tt;
 
     if (mpirank == 0) {
         int final_sum;
@@ -48,6 +49,7 @@ int main(int argc, char** argv) {
 
         std::cout<<"The expected sum was: "<<expected<<std::endl;
         std::cout<<"The final sum was: "<<final_sum<<std::endl;
+        std::cout<<"Message latency: "<<tt/N*1000<<" ms"<<std::endl;
     }
 
     MPI_Finalize();
