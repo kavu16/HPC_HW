@@ -44,12 +44,12 @@ int main(int argc, char** argv) {
     }
 
     MPI_Barrier(comm);
-    double* final_array = (double*) malloc(N * sizeof(double));
+    if (mpirank == 0) double* final_array = (double*) malloc(N * sizeof(double));
     MPI_Gather(local_scan, N/mpisize, MPI_DOUBLE, final_array, N, MPI_DOUBLE, 0, comm);
     if (mpirank == 0) {
         std::cout << "Final scan = " << final_array[N-1] << std::endl;
     }
-    free(final_array);
+    if (mpirank == 0) free(final_array);
     free(local_scan);
     free(all_offsets);
     return 0;
