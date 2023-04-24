@@ -28,34 +28,34 @@ int main(int argc, char** argv) {
     for (long i = 0; i < N; ++i) {
         if (mpirank == 0 && i == 0) {
             // 2MB = 2 * 2^20 bytes = 2^2 bytes * 2^19 bytes = sizeof(int) * 524288
-            int* init = (int*) malloc(524288 * sizeof(int));
-            // int init = 0;
-            for (long i = 0; i < 524288; ++i) init[i] = 0;
-            // MPI_Send(&init, 1, MPI_INT, 1, 999, comm);
-            MPI_Send(init, 1, MPI_INT, 1, 999, comm);
-            free(init);
+            // int* init = (int*) malloc(524288 * sizeof(int));
+            int init = 0;
+            // for (long i = 0; i < 524288; ++i) init[i] = 0;
+            MPI_Send(&init, 1, MPI_INT, 1, 999, comm);
+            // MPI_Send(init, 1, MPI_INT, 1, 999, comm);
+            // free(init);
         }
         else {
-            // int curr;
-            int* curr = (int*) malloc(524288 * sizeof(int));
-            // MPI_Recv(&curr, 1, MPI_INT, (mpirank - 1 + mpisize)%mpisize, 999, comm, &status);
-            MPI_Recv(curr, 1, MPI_INT, (mpirank - 1 + mpisize)%mpisize, 999, comm, &status);
+            int curr;
+            // int* curr = (int*) malloc(524288 * sizeof(int));
+            MPI_Recv(&curr, 1, MPI_INT, (mpirank - 1 + mpisize)%mpisize, 999, comm, &status);
+            // MPI_Recv(curr, 1, MPI_INT, (mpirank - 1 + mpisize)%mpisize, 999, comm, &status);
 
-            // curr += mpirank;
-            for (long i = 0; i < 524288; ++i) curr[i] += mpirank;
+            curr += mpirank;
+            // for (long i = 0; i < 524288; ++i) curr[i] += mpirank;
 
-            // MPI_Send(&curr, 1, MPI_INT, (mpirank + 1)%mpisize, 999, comm);
-            MPI_Send(curr, 1, MPI_INT, (mpirank + 1)%mpisize, 999, comm);
-            free(curr);
+            MPI_Send(&curr, 1, MPI_INT, (mpirank + 1)%mpisize, 999, comm);
+            // MPI_Send(curr, 1, MPI_INT, (mpirank + 1)%mpisize, 999, comm);
+            // free(curr);
         }
     }
     tt = MPI_Wtime() - tt;
 
     if (mpirank == 0) {
-        // int final_sum;
-        int* final_sum = (int*) malloc(524288 * sizeof(int));
-        // MPI_Recv(&final_sum, 1, MPI_INT, mpisize-1, 999, comm, &status);
-        MPI_Recv(final_sum, 1, MPI_INT, mpisize-1, 999, comm, &status);
+        int final_sum;
+        // int* final_sum = (int*) malloc(524288 * sizeof(int));
+        MPI_Recv(&final_sum, 1, MPI_INT, mpisize-1, 999, comm, &status);
+        // MPI_Recv(final_sum, 1, MPI_INT, mpisize-1, 999, comm, &status);
 
         int expected = 0;
         for (long i = 0; i < mpisize; ++i) {
@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
         std::cout<<"The expected sum was: "<<expected<<std::endl;
         std::cout<<"The final sum was: "<<final_sum[0]<<std::endl;
         std::cout<<"Message latency: "<<tt/N*1000<<" ms"<<std::endl;
-        std::cout<<"Message bandwidth: "<< (524288*sizeof(int)*N)/tt/1e9 <<" GB/s"<<std::endl;
+        // std::cout<<"Message bandwidth: "<< (524288*sizeof(int)*N)/tt/1e9 <<" GB/s"<<std::endl;
     }
 
     MPI_Finalize();
