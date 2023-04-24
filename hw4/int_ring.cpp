@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
 
     if (mpirank == 0) {
         // int final_sum;
-        int* final_sum;
+        int* final_sum = (int*) malloc(524288 * sizeof(int));
         // MPI_Recv(&final_sum, 1, MPI_INT, mpisize-1, 999, comm, &status);
         MPI_Recv(final_sum, 1, MPI_INT, mpisize-1, 999, comm, &status);
 
