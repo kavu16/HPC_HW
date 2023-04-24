@@ -27,21 +27,21 @@ int main(int argc, char** argv) {
             int* init = (int*) malloc(524288 * sizeof(int));
             for (long i = 0; i < 524288; ++i) init[i] = 0;
             // int init = 0;
-            // MPI_Send(&init, 1, MPI_INT, 1, 999, comm);
-            MPI_Send(init, 1, MPI_INT, 1, 999, comm);
+            MPI_Send(&init, 1, MPI_INT, 1, 999, comm);
+            // MPI_Send(init, 1, MPI_INT, 1, 999, comm);
             free(init);
         }
         else {
             int* curr;
             // int curr;
-            // MPI_Recv(&curr, 1, MPI_INT, (mpirank - 1 + mpisize)%mpisize, 999, comm, &status);
-            MPI_Recv(curr, 1, MPI_INT, (mpirank - 1 + mpisize)%mpisize, 999, comm, &status);
+            MPI_Recv(&curr, 1, MPI_INT, (mpirank - 1 + mpisize)%mpisize, 999, comm, &status);
+            // MPI_Recv(curr, 1, MPI_INT, (mpirank - 1 + mpisize)%mpisize, 999, comm, &status);
 
             // curr += mpirank;
             for (long i = 0; i < 524288; ++i) curr[i] += mpirank;
 
-            // MPI_Send(&curr, 1, MPI_INT, (mpirank + 1)%mpisize, 999, comm);
-            MPI_Send(curr, 1, MPI_INT, (mpirank + 1)%mpisize, 999, comm);
+            MPI_Send(&curr, 1, MPI_INT, (mpirank + 1)%mpisize, 999, comm);
+            // MPI_Send(curr, 1, MPI_INT, (mpirank + 1)%mpisize, 999, comm);
             free(curr);
         }
     }
@@ -50,8 +50,8 @@ int main(int argc, char** argv) {
     if (mpirank == 0) {
         // int final_sum;
         int* final_sum;
-        // MPI_Recv(&final_sum, 1, MPI_INT, mpisize-1, 999, comm, &status);
-        MPI_Recv(final_sum, 1, MPI_INT, mpisize-1, 999, comm, &status);
+        MPI_Recv(&final_sum, 1, MPI_INT, mpisize-1, 999, comm, &status);
+        // MPI_Recv(final_sum, 1, MPI_INT, mpisize-1, 999, comm, &status);
 
         int expected = 0;
         for (long i = 0; i < mpisize; ++i) {
