@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
 
     MPI_Barrier(comm);
     double* all_offsets = (double*) malloc(mpisize*sizeof(double));
-    MPI_Allgather(&offset, 1, MPI_DOUBLE, all_offsets, mpisize, MPI_DOUBLE, comm);
+    MPI_Allgather(&offset, 1, MPI_DOUBLE, all_offsets, 1, MPI_DOUBLE, comm);
 
     std::cout<< "offset for process " << mpirank << " is " << all_offsets[mpirank] << std::endl;
 
