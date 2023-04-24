@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
             free(init);
         }
         else {
-            int curr;
+            // int curr;
             int* curr = (int*) malloc(524288 * sizeof(int));
             // MPI_Recv(&curr, 1, MPI_INT, (mpirank - 1 + mpisize)%mpisize, 999, comm, &status);
             MPI_Recv(curr, 1, MPI_INT, (mpirank - 1 + mpisize)%mpisize, 999, comm, &status);
