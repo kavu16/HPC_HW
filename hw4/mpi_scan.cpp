@@ -24,13 +24,14 @@ int main(int argc, char** argv) {
         free(scan_array);
     }
 
-    MPI_Barrier(comm);
+    
     double offset;
     for (long i = 1; i < N/mpisize; ++i) {
         local_scan[i] += local_scan[i-1];
         offset = local_scan[i];
     }
 
+    MPI_Barrier(comm);
     double* all_offsets = (double*) malloc(mpisize*sizeof(double));
     MPI_Allgather(&offset, 1, MPI_DOUBLE, all_offsets, mpisize, MPI_DOUBLE, comm);
 
@@ -42,6 +43,7 @@ int main(int argc, char** argv) {
         }
     }
 
+    MPI_Barrier(comm);
     double* final_array = (double*) malloc(N * sizeof(double));
     MPI_Gather(local_scan, N/mpisize, MPI_DOUBLE, final_array, N, MPI_DOUBLE, 0, comm);
     if (mpirank == 0) {
