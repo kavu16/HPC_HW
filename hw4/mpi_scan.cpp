@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
         offset = local_scan[i];
     }
 
-    
+    MPI_Barrier(comm);
     double* all_offsets = (double*) malloc(mpisize*sizeof(double));
     MPI_Allgather(&offset, 1, MPI_DOUBLE, all_offsets, mpisize, MPI_DOUBLE, comm);
 
@@ -48,7 +48,6 @@ int main(int argc, char** argv) {
     MPI_Barrier(comm);
     std::cout<< "Process " << mpirank << " final scan total = " << local_scan[N/mpisize - 1] << std::endl;
 
-    MPI_Barrier(comm);
     double *final_array = (double*) malloc(N * sizeof(double));
     MPI_Gather(local_scan, N/mpisize, MPI_DOUBLE, 
                final_array, N/mpisize, MPI_DOUBLE, 0, comm);
