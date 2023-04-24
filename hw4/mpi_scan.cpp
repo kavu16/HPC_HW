@@ -43,10 +43,12 @@ int main(int argc, char** argv) {
         }
     }
 
+    std::cout<< "Process " << mpirank << " final scan total = " << local_scan[N/mpisize - 1] << std::endl;
+
     MPI_Barrier(comm);
     double *final_array = (double*) malloc(N * sizeof(double));
     MPI_Gather(local_scan, N/mpisize, MPI_DOUBLE, 
-               final_array, N, MPI_DOUBLE, 0, comm);
+               final_array, N/mpisize, MPI_DOUBLE, 0, comm);
     if (mpirank == 0) {
         std::cout << "Final scan = " << final_array[N-1] << std::endl;
     }
